@@ -4,80 +4,143 @@
     <meta charset="UTF-8">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Playlist Personal</title>
+    <title>404 STORIES NOT FOUND // TERMINAL PLAYER</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+
     <style>
-        /* CSS Consistente (Agosto 18) */
+        /* --- ESTÉTICA HACKER / CYBERPUNK --- */
         :root {
             --sidebar-width: 350px;
-            --bg-dark: #0f0f0f;
-            --bg-light: #ffffff;
-            --accent: #ff0000;
-            --text-main: #0f0f0f;
-            --text-muted: #606060;
+            --bg-main: #000000;     /* Negro puro */
+            --bg-terminal: #0a0a0a; /* Casi negro para la barra lateral */
+            --neon-green: #39ff14;  /* Verde terminal clásico */
+            --neon-cyan: #00f3ff;   /* Azul cian eléctrico para acentos */
+            --text-muted: #005f05;  /* Verde oscuro apagado */
+            --font-hacker: 'Fira Code', 'Courier New', monospace;
         }
 
         body {
-            font-family: 'Roboto', Arial, sans-serif;
+            font-family: var(--font-hacker);
             margin: 0;
             display: flex;
             height: 100vh;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
+            background-color: var(--bg-main);
+            color: var(--neon-green);
             overflow: hidden;
+            /* Un sutil efecto de líneas de escaneo CRT */
+            background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
         }
 
+        /* Panel Lateral */
         #sidebar {
             width: var(--sidebar-width);
-            background-color: var(--bg-light);
+            background-color: var(--bg-terminal);
             display: flex;
             flex-direction: column;
-            border-right: 1px solid #e5e5e5;
+            border-right: 2px solid var(--neon-green);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.2); /* Resplandor verde */
         }
 
         .header {
             padding: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 2px dashed var(--text-muted);
+            background: #050505;
         }
 
-        .header h2 { margin: 0; font-size: 1.2rem; color: var(--accent); }
+        .channel-title {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 8px var(--neon-cyan); /* Texto brillante */
+            letter-spacing: -1px;
+        }
+
+        .sub-header {
+            margin: 5px 0 15px 0;
+            font-size: 0.8rem;
+            color: var(--neon-green);
+        }
+
+        /* Efecto de cursor parpadeante */
+        .blinking-cursor::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+            margin-left: 5px;
+            color: var(--neon-green);
+        }
+        @keyframes blink { 50% { opacity: 0; } }
 
         #playlist-container {
             flex-grow: 1;
             overflow-y: auto;
-            padding: 10px;
+            padding: 15px;
+             /* Barra de scroll estilo terminal */
+            scrollbar-width: thin;
+            scrollbar-color: var(--neon-green) var(--bg-terminal);
         }
 
+        /* Tarjetas de Video */
         .video-card {
             display: flex;
-            align-items: center;
-            padding: 10px;
+            align-items: flex-start;
+            padding: 12px;
             margin-bottom: 10px;
             cursor: pointer;
-            border-radius: 8px;
-            transition: background 0.2s;
-            border: 1px solid transparent;
+            border: 1px solid var(--text-muted);
+            background: rgba(0, 20, 0, 0.6);
+            transition: all 0.2s ease-in-out;
+            position: relative;
         }
 
-        .video-card:hover { background: #f2f2f2; }
-        .video-card.active { background: #e8e8e8; border-color: var(--accent); }
+        .video-card:hover {
+            background: var(--neon-green);
+            color: var(--bg-main); /* Invertimos colores al pasar el ratón */
+            box-shadow: 0 0 10px var(--neon-green);
+            border-color: var(--neon-green);
+        }
+        
+        .video-card:hover .video-index { color: var(--bg-main); font-weight: bold;}
 
-        .video-info { margin-left: 12px; }
-        .video-title { font-size: 0.9rem; font-weight: 500; display: block; margin-bottom: 4px; }
-        .video-index { font-size: 0.75rem; color: var(--text-muted); }
+        .video-card.active {
+            border: 1px solid var(--neon-cyan);
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.3);
+        }
+        .video-card.active::before {
+            content: '> '; /* Añadimos un prompt al activo */
+            color: var(--neon-cyan);
+            position: absolute;
+            left: 5px;
+        }
 
+        .video-info { margin-left: 12px; flex-grow: 1; }
+        .video-title { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px; line-height: 1.2;}
+        .video-index { font-size: 0.7rem; color: var(--neon-cyan); letter-spacing: 1px;}
+
+        /* Contenedor del Reproductor */
         #player-wrapper {
             flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 40px;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
         }
 
         .iframe-container {
             width: 100%;
             max-width: 1200px;
             aspect-ratio: 16 / 9;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            /* Marco de pantalla brillante */
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.4), 0 0 5px rgba(0, 243, 255, 0.5);
+            border: 3px solid var(--text-muted);
+            padding: 2px;
+            background: var(--bg-main);
         }
     </style>
 </head>
@@ -85,8 +148,9 @@
 
 <div id="sidebar">
     <div class="header">
-        <h2>Mi Lista de Reproducción</h2>
-        <p id="status" style="font-size: 0.8rem; color: #666;">Cargando vídeos...</p>
+        <h1 class="channel-title">> 404 Stories Not Found_</h1>
+        <p class="sub-header">[ PLAYLIST PROTOCOL INITIATED ]</p>
+        <p id="status" style="font-size: 0.75rem; color: var(--neon-cyan);">SYSTEM CHECK: Inicializando...</p>
     </div>
     <div id="playlist-container"></div>
 </div>
@@ -109,7 +173,11 @@
             playerVars: {
                 listType: 'playlist',
                 list: PLAYLIST_ID,
-                origin: window.location.origin || 'http://localhost' // Fix Error 153
+                origin: window.location.origin,
+                // Hacemos que la interfaz del reproductor sea oscura y mínima
+                color: 'white',
+                modestbranding: 1,
+                rel: 0
             },
             events: {
                 'onReady': onPlayerReady
@@ -118,9 +186,10 @@
     }
 
     async function onPlayerReady(event) {
-        document.getElementById('status').innerText = "Lista cargada. Obteniendo nombres...";
+        const status = document.getElementById('status');
+        status.innerText = "CONEXIÓN ESTABLECIDA. Descifrando metadatos...";
+        status.classList.add('blinking-cursor');
         
-        // Obtenemos los IDs de los vídeos que el reproductor ya cargó
         const playlistIds = player.getPlaylist();
         const container = document.getElementById('playlist-container');
         container.innerHTML = '';
@@ -128,36 +197,38 @@
         for (let i = 0; i < playlistIds.length; i++) {
             const videoId = playlistIds[i];
             
-            // Creamos el elemento visual (card)
             const card = document.createElement('div');
             card.className = 'video-card';
             card.id = `video-${i}`;
             card.onclick = () => playVideo(i);
 
-            // Intentamos obtener el título mediante el servicio noembed
+            // Usamos 'await' para que se carguen en orden, parece más un escaneo
             try {
                 const response = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
                 const data = await response.json();
-                const title = data.title || `Vídeo ${i + 1}`;
+                const title = data.title || `DATA_CORRUPTED_${i + 1}`;
                 
                 card.innerHTML = `
                     <div class="video-info">
-                        <span class="video-title">${title}</span>
-                        <span class="video-index">Posición #${i + 1}</span>
-                    </div>
+                        <span class="video-index">// ENTRY_0${i + 1}</span>
+                        <span class="video-title">${title.toUpperCase()}</span> </div>
                 `;
             } catch (e) {
-                card.innerHTML = `<div class="video-info"><span class="video-title">Vídeo ${i + 1}</span></div>`;
+                 card.innerHTML = `<div class="video-info"><span class="video-index">// ERROR_0${i+1}</span><span class="video-title">UNKNOWN DATA</span></div>`;
             }
             
             container.appendChild(card);
+            // Un pequeño scroll automático hacia abajo mientras carga para efecto "matrix"
+            container.scrollTop = container.scrollHeight;
         }
-        document.getElementById('status').innerText = `${playlistIds.length} vídeos encontrados.`;
+        status.innerText = `>> SCAN COMPLETE. ${playlistIds.length} ARCHIVOS ENCONTRADOS. Listo para ejecutar. <<`;
+        status.classList.remove('blinking-cursor');
+        // Marcar el primero como activo
+        document.getElementById('video-0').classList.add('active');
     }
 
     function playVideo(index) {
         player.playVideoAt(index);
-        // Resaltar el vídeo actual
         document.querySelectorAll('.video-card').forEach(c => c.classList.remove('active'));
         document.getElementById(`video-${index}`).classList.add('active');
     }
